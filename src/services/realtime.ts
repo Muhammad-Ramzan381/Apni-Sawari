@@ -53,7 +53,7 @@ export function subscribeToDriverLocation(
 ): () => void {
   const locationRef = ref(rtdb, `driver_locations/${driverId}`);
 
-  const listener = onValue(locationRef, (snapshot) => {
+  const handler = (snapshot: any) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
       callback({
@@ -65,9 +65,11 @@ export function subscribeToDriverLocation(
     } else {
       callback(null);
     }
-  });
+  };
 
-  return () => off(locationRef);
+  onValue(locationRef, handler);
+
+  return () => off(locationRef, "value", handler);
 }
 
 export async function getNearbyDrivers(
@@ -143,7 +145,7 @@ export function subscribeToActiveRide(
 ): () => void {
   const rideRef = ref(rtdb, `active_rides/${rideId}`);
 
-  const listener = onValue(rideRef, (snapshot) => {
+  const handler = (snapshot: any) => {
     if (snapshot.exists()) {
       const data = snapshot.val();
       callback({
@@ -154,9 +156,11 @@ export function subscribeToActiveRide(
     } else {
       callback(null);
     }
-  });
+  };
 
-  return () => off(rideRef);
+  onValue(rideRef, handler);
+
+  return () => off(rideRef, "value", handler);
 }
 
 export function removeActiveRide(rideId: string): Promise<void> {

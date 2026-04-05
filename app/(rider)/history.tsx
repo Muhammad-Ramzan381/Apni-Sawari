@@ -20,17 +20,18 @@ export default function HistoryScreen() {
 
   useEffect(() => {
     if (!user) return;
-
+    let mounted = true;
     (async () => {
       try {
         const history = await getRiderHistory(user.id);
-        setRides(history);
+        if (mounted) setRides(history);
       } catch {
         // Firestore not configured
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
+    return () => { mounted = false; };
   }, [user]);
 
   if (loading) {

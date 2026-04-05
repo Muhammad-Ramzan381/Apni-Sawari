@@ -65,7 +65,17 @@
     "noRides": "No rides yet",
     "wallet": "Wallet",
     "rewards": "Rewards",
-    "profile": "Profile"
+    "profile": "Profile",
+    "creatingRide": "Creating your ride...",
+    "searchingFor": "Searching for {{seconds}}s...",
+    "connectingDriver": "Connecting you with your driver...",
+    "rideCancelled": "Ride cancelled",
+    "driversNearby": "{{count}} drivers nearby",
+    "paidVia": "Paid via {{method}}",
+    "ratingSorry": "We're sorry about your experience",
+    "ratingThanks": "Thanks for your feedback!",
+    "ratingGreat": "Glad you had a great ride!",
+    "gettingLocation": "Getting your location..."
   },
   "driver": {
     "goOnline": "Go Online",
@@ -87,7 +97,14 @@
     "wallet": "Wallet",
     "balance": "Balance",
     "topUp": "Top Up",
-    "commission": "Commission"
+    "commission": "Commission",
+    "youreOnline": "You're Online",
+    "youreOffline": "You're Offline",
+    "waitingForRequests": "Waiting for ride requests...",
+    "goOnlineToEarn": "Go Online to start earning",
+    "locationBroadcasting": "Location broadcasting active",
+    "rides": "Rides",
+    "earned": "Earned"
   },
   "settings": {
     "settings": "Settings",
@@ -100,7 +117,9 @@
     "about": "About",
     "help": "Help & Support",
     "terms": "Terms & Conditions",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "switchRolesAnytime": "You can switch roles anytime in settings",
+    "settingUpAccount": "Setting up your account..."
   },
   "notifications": {
     "driverNearby": "Your driver is {{distance}} away",

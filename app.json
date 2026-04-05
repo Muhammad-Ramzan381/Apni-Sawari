@@ -16,9 +16,6 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.apnisawari.app",
-      "config": {
-        "googleMapsApiKey": "YOUR_IOS_GOOGLE_MAPS_KEY"
-      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need your location to find nearby drivers and show your position on the map.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "We need your location to track your ride in real-time.",
@@ -32,11 +29,6 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "config": {
-        "googleMaps": {
-          "apiKey": "YOUR_ANDROID_GOOGLE_MAPS_KEY"
-        }
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
@@ -52,6 +44,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsImpl": "mapbox"
+        }
+      ],
       "expo-localization",
       [
         "expo-location",

@@ -139,7 +139,7 @@ export default function BookingScreen() {
 
         <Text className="text-xl font-bold text-gray-900 mb-2">
           {status === "creating"
-            ? "Creating your ride..."
+            ? t("rider.creatingRide")
             : status === "found"
               ? t("rider.driverFound")
               : t("rider.findingDriver")}
@@ -147,13 +147,13 @@ export default function BookingScreen() {
 
         {status === "searching" ? (
           <Text className="text-base text-gray-500 mb-6">
-            Searching for {searchTime}s...
+            {t("rider.searchingFor", { seconds: searchTime })}
           </Text>
         ) : null}
 
         {status === "found" ? (
           <Text className="text-base text-primary-600 font-medium mb-6">
-            Connecting you with your driver...
+            {t("rider.connectingDriver")}
           </Text>
         ) : null}
 

@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { sendMessage, subscribeToMessages, ChatMessage } from "../../services/chat";
-import { maskPhone } from "../../utils/validation";
 
 interface ChatScreenProps {
   rideId: string;

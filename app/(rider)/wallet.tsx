@@ -37,18 +37,22 @@ export default function WalletScreen() {
 
   useEffect(() => {
     if (!user) return;
+    let mounted = true;
     (async () => {
       try {
         const w = await getOrCreateWallet(user.id);
         const txs = await getTransactions(user.id);
-        setWallet({ ...w, transactions: txs });
-        setTransactions(txs);
+        if (mounted) {
+          setWallet({ ...w, transactions: txs });
+          setTransactions(txs);
+        }
       } catch {
         // Firestore not configured
       } finally {
-        setPageLoading(false);
+        if (mounted) setPageLoading(false);
       }
     })();
+    return () => { mounted = false; };
   }, [user]);
 
   const handleTopUp = async () => {

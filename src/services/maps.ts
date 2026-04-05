@@ -13,6 +13,9 @@ export async function getDirections(
   const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}&key=${GOOGLE_MAPS_API_KEY}`;
 
   const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Directions API request failed");
+  }
   const data = await response.json();
 
   if (data.status !== "OK" || !data.routes.length) {

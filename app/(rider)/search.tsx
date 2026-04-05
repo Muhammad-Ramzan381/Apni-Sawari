@@ -7,7 +7,7 @@ import LocationInput, {
   PlaceResult,
 } from "../../src/components/common/LocationInput";
 import Button from "../../src/components/ui/Button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -28,13 +28,15 @@ export default function SearchScreen() {
   const [dropoffSet, setDropoffSet] = useState(!!dropoff);
 
   // Auto-set pickup to current location if not set
-  if (!pickup && currentLocation) {
-    setPickup({
-      address: t("rider.currentLocation"),
-      lat: currentLocation.lat,
-      lng: currentLocation.lng,
-    });
-  }
+  useEffect(() => {
+    if (!pickup && currentLocation) {
+      setPickup({
+        address: t("rider.currentLocation"),
+        lat: currentLocation.lat,
+        lng: currentLocation.lng,
+      });
+    }
+  }, [pickup, currentLocation]);
 
   const handlePickupSelect = (place: PlaceResult) => {
     setPickup({ address: place.address, lat: place.lat, lng: place.lng });

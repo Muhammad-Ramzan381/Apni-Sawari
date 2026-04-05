@@ -65,7 +65,17 @@
     "noRides": "ابھی تک کوئی سواری نہیں",
     "wallet": "والٹ",
     "rewards": "انعامات",
-    "profile": "پروفائل"
+    "profile": "پروفائل",
+    "creatingRide": "آپ کی سواری بنائی جا رہی ہے...",
+    "searchingFor": "{{seconds}} سیکنڈ سے تلاش جاری...",
+    "connectingDriver": "آپ کو آپ کے ڈرائیور سے جوڑا جا رہا ہے...",
+    "rideCancelled": "سواری منسوخ ہو گئی",
+    "driversNearby": "{{count}} ڈرائیور قریب ہیں",
+    "paidVia": "{{method}} سے ادائیگی",
+    "ratingSorry": "آپ کے تجربے کے لیے معذرت",
+    "ratingThanks": "آپ کی رائے کا شکریہ!",
+    "ratingGreat": "خوشی ہے کہ آپ کی سواری اچھی رہی!",
+    "gettingLocation": "آپ کا مقام حاصل ہو رہا ہے..."
   },
   "driver": {
     "goOnline": "آن لائن ہوں",
@@ -87,7 +97,14 @@
     "wallet": "والٹ",
     "balance": "بیلنس",
     "topUp": "ٹاپ اپ",
-    "commission": "کمیشن"
+    "commission": "کمیشن",
+    "youreOnline": "آپ آن لائن ہیں",
+    "youreOffline": "آپ آف لائن ہیں",
+    "waitingForRequests": "سواری کی درخواستوں کا انتظار...",
+    "goOnlineToEarn": "کمانا شروع کرنے کے لیے آن لائن ہوں",
+    "locationBroadcasting": "مقام نشر ہو رہا ہے",
+    "rides": "سواریاں",
+    "earned": "کمائی"
   },
   "settings": {
     "settings": "ترتیبات",
@@ -100,7 +117,9 @@
     "about": "ہمارے بارے میں",
     "help": "مدد اور سپورٹ",
     "terms": "شرائط و ضوابط",
-    "privacy": "رازداری کی پالیسی"
+    "privacy": "رازداری کی پالیسی",
+    "switchRolesAnytime": "آپ ترتیبات میں کسی بھی وقت کردار تبدیل کر سکتے ہیں",
+    "settingUpAccount": "آپ کا اکاؤنٹ بنایا جا رہا ہے..."
   },
   "notifications": {
     "driverNearby": "آپ کا ڈرائیور {{distance}} دور ہے",

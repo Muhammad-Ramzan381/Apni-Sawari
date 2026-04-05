@@ -2,12 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import { View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import Mapbox from "../../src/services/mapbox";
 import { useLocationStore } from "../../src/stores/locationStore";
 import { useRideStore } from "../../src/stores/rideStore";
-import { subscribeToActiveRide } from "../../src/services/realtime";
 import { getDirections, decodePolyline } from "../../src/services/maps";
-import { DEFAULT_MAP_DELTA } from "../../src/utils/constants";
 import DriverMarker from "../../src/components/map/DriverMarker";
 import RoutePolyline from "../../src/components/map/RoutePolyline";
 import RideStatusBar from "../../src/components/ride/RideStatusBar";
@@ -19,7 +17,7 @@ export default function TrackingScreen() {
   const { t } = useTranslation();
   const { currentLocation, pickup, dropoff } = useLocationStore();
   const { driverLocation, setDriverLocation, setEta, eta } = useRideStore();
-  const mapRef = useRef<MapView>(null);
+  const cameraRef = useRef<Mapbox.Camera>(null);
 
   const [rideStatus, setRideStatus] = useState<RideStatus>("accepted");
   const [routeCoords, setRouteCoords] = useState<
@@ -52,7 +50,6 @@ export default function TrackingScreen() {
   useEffect(() => {
     if (!pickup) return;
 
-    // Simulate driver approaching
     let step = 0;
     const startLat = pickup.lat + 0.01;
     const startLng = pickup.lng + 0.008;
@@ -100,76 +97,57 @@ export default function TrackingScreen() {
     return () => clearInterval(interval);
   }, [pickup, dropoff]);
 
-  // Fit map to show all markers
-  useEffect(() => {
-    if (!mapRef.current || !pickup || !dropoff) return;
-
-    const coords = [
-      { latitude: pickup.lat, longitude: pickup.lng },
-      { latitude: dropoff.lat, longitude: dropoff.lng },
-    ];
-
-    if (driverLocation) {
-      coords.push({
-        latitude: driverLocation.lat,
-        longitude: driverLocation.lng,
-      });
-    }
-
-    mapRef.current.fitToCoordinates(coords, {
-      edgePadding: { top: 100, right: 50, bottom: 300, left: 50 },
-      animated: true,
-    });
-  }, [pickup, dropoff, driverLocation]);
-
   const statusMessages: Record<RideStatus, string> = {
     searching: t("rider.findingDriver"),
     accepted: t("rider.driverFound"),
     arrived: t("rider.driverArrived"),
     started: t("rider.rideStarted"),
     completed: t("rider.rideCompleted"),
-    cancelled: "Ride cancelled",
+    cancelled: t("rider.rideCancelled"),
   };
 
   return (
     <View className="flex-1">
-      <MapView
-        ref={mapRef}
+      <Mapbox.MapView
         style={{ flex: 1 }}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation
-        initialRegion={
-          currentLocation
-            ? {
-                latitude: currentLocation.lat,
-                longitude: currentLocation.lng,
-                ...DEFAULT_MAP_DELTA,
-              }
-            : undefined
-        }
+        styleURL={Mapbox.StyleURL.Street}
+        logoEnabled={false}
+        attributionEnabled={false}
       >
+        <Mapbox.Camera
+          ref={cameraRef}
+          zoomLevel={13}
+          centerCoordinate={
+            currentLocation
+              ? [currentLocation.lng, currentLocation.lat]
+              : [74.35, 31.52]
+          }
+        />
+
+        <Mapbox.UserLocation visible animated />
+
         {/* Pickup marker */}
         {pickup && (
-          <Marker
-            coordinate={{ latitude: pickup.lat, longitude: pickup.lng }}
-            title="Pickup"
+          <Mapbox.PointAnnotation
+            id="pickup-marker"
+            coordinate={[pickup.lng, pickup.lat]}
           >
             <View className="bg-green-500 rounded-full p-1.5">
               <Text className="text-white text-xs font-bold">P</Text>
             </View>
-          </Marker>
+          </Mapbox.PointAnnotation>
         )}
 
         {/* Dropoff marker */}
         {dropoff && (
-          <Marker
-            coordinate={{ latitude: dropoff.lat, longitude: dropoff.lng }}
-            title="Drop-off"
+          <Mapbox.PointAnnotation
+            id="dropoff-marker"
+            coordinate={[dropoff.lng, dropoff.lat]}
           >
             <View className="bg-red-500 rounded-full p-1.5">
               <Text className="text-white text-xs font-bold">D</Text>
             </View>
-          </Marker>
+          </Mapbox.PointAnnotation>
         )}
 
         {/* Driver marker */}
@@ -182,7 +160,7 @@ export default function TrackingScreen() {
 
         {/* Route polyline */}
         <RoutePolyline coordinates={routeCoords} />
-      </MapView>
+      </Mapbox.MapView>
 
       {/* Status & Driver Info */}
       <View className="absolute bottom-0 left-0 right-0 px-4 pb-4">

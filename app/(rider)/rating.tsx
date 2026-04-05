@@ -51,7 +51,7 @@ export default function RatingScreen() {
           </Text>
           {activeRide?.paymentMethod ? (
             <Text className="text-center text-gray-400 text-sm mt-1">
-              Paid via {activeRide.paymentMethod}
+              {t("rider.paidVia", { method: activeRide.paymentMethod })}
             </Text>
           ) : null}
         </Card>
@@ -77,10 +77,10 @@ export default function RatingScreen() {
         {rating > 0 ? (
           <Text className="text-sm text-gray-400">
             {rating <= 2
-              ? "We're sorry about your experience"
+              ? t("rider.ratingSorry")
               : rating <= 4
-                ? "Thanks for your feedback!"
-                : "Glad you had a great ride!"}
+                ? t("rider.ratingThanks")
+                : t("rider.ratingGreat")}
           </Text>
         ) : null}
       </View>

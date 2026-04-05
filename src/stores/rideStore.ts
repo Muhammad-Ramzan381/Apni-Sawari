@@ -46,6 +46,7 @@ export const useRideStore = create<RideState>((set) => ({
     set({
       activeRide: null,
       selectedVehicle: null,
+      paymentMethod: "cash",
       driverLocation: null,
       eta: null,
     }),

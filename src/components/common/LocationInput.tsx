@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -27,8 +27,6 @@ interface LocationInputProps {
   leftIcon?: React.ReactNode;
 }
 
-let debounceTimer: ReturnType<typeof setTimeout>;
-
 export default function LocationInput({
   placeholder,
   value,
@@ -40,6 +38,7 @@ export default function LocationInput({
   const [suggestions, setSuggestions] = useState<PlaceResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const searchPlaces = useCallback(async (text: string) => {
     if (text.length < 3) {
@@ -92,8 +91,8 @@ export default function LocationInput({
 
   const handleChangeText = (text: string) => {
     onChangeText(text);
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => searchPlaces(text), 400);
+    clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => searchPlaces(text), 400);
   };
 
   const handleSelectPlace = (place: PlaceResult) => {

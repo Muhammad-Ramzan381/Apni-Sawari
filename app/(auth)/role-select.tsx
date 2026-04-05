@@ -63,7 +63,7 @@ export default function RoleSelectScreen() {
   };
 
   if (loading) {
-    return <LoadingSpinner fullScreen message="Setting up your account..." />;
+    return <LoadingSpinner fullScreen message={t("settings.settingUpAccount")} />;
   }
 
   return (
@@ -73,7 +73,7 @@ export default function RoleSelectScreen() {
           {t("auth.selectRole")}
         </Text>
         <Text className="text-base text-gray-500 mb-8">
-          You can switch roles anytime in settings
+          {t("settings.switchRolesAnytime")}
         </Text>
 
         <Card onPress={() => handleRoleSelect("rider")} className="mb-4">

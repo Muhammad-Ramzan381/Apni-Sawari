@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import Mapbox from "../../src/services/mapbox";
 import { useLocationStore } from "../../src/stores/locationStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { updateDriverLocation } from "../../src/services/realtime";
-import { updateActiveRide } from "../../src/services/realtime";
 import { getDirections, decodePolyline } from "../../src/services/maps";
-import { DEFAULT_MAP_DELTA } from "../../src/utils/constants";
 import RoutePolyline from "../../src/components/map/RoutePolyline";
 import Card from "../../src/components/ui/Card";
 import Button from "../../src/components/ui/Button";
@@ -24,7 +22,6 @@ export default function DriverNavigationScreen() {
   const [routeCoords, setRouteCoords] = useState<
     Array<{ latitude: number; longitude: number }>
   >([]);
-  const mapRef = useRef<MapView>(null);
 
   // Mock pickup/dropoff (in production, comes from ride data)
   const pickupLocation = { lat: 31.52, lng: 74.35 };
@@ -63,10 +60,8 @@ export default function DriverNavigationScreen() {
         break;
       case "arrived":
         setStatus("in_progress");
-        // Update route to dropoff
         break;
       case "in_progress":
-        // Complete ride
         if (user) {
           updateDriverLocation(
             user.id,
@@ -100,47 +95,45 @@ export default function DriverNavigationScreen() {
 
   return (
     <View className="flex-1">
-      <MapView
-        ref={mapRef}
+      <Mapbox.MapView
         style={{ flex: 1 }}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation
-        initialRegion={
-          currentLocation
-            ? {
-                latitude: currentLocation.lat,
-                longitude: currentLocation.lng,
-                ...DEFAULT_MAP_DELTA,
-              }
-            : undefined
-        }
+        styleURL={Mapbox.StyleURL.Street}
+        logoEnabled={false}
+        attributionEnabled={false}
       >
+        <Mapbox.Camera
+          zoomLevel={13}
+          centerCoordinate={
+            currentLocation
+              ? [currentLocation.lng, currentLocation.lat]
+              : [74.35, 31.52]
+          }
+        />
+
+        <Mapbox.UserLocation visible animated />
+
         {/* Pickup marker */}
-        <Marker
-          coordinate={{
-            latitude: pickupLocation.lat,
-            longitude: pickupLocation.lng,
-          }}
+        <Mapbox.PointAnnotation
+          id="pickup-nav"
+          coordinate={[pickupLocation.lng, pickupLocation.lat]}
         >
           <View className="bg-green-500 rounded-full p-1.5">
             <Text className="text-white text-xs font-bold">P</Text>
           </View>
-        </Marker>
+        </Mapbox.PointAnnotation>
 
         {/* Dropoff marker */}
-        <Marker
-          coordinate={{
-            latitude: dropoffLocation.lat,
-            longitude: dropoffLocation.lng,
-          }}
+        <Mapbox.PointAnnotation
+          id="dropoff-nav"
+          coordinate={[dropoffLocation.lng, dropoffLocation.lat]}
         >
           <View className="bg-red-500 rounded-full p-1.5">
             <Text className="text-white text-xs font-bold">D</Text>
           </View>
-        </Marker>
+        </Mapbox.PointAnnotation>
 
         <RoutePolyline coordinates={routeCoords} />
-      </MapView>
+      </Mapbox.MapView>
 
       <View className="absolute bottom-0 left-0 right-0 px-4 pb-4">
         <Card className="shadow-lg">
@@ -171,7 +164,7 @@ export default function DriverNavigationScreen() {
           <Button
             title={actionLabel[status]}
             onPress={handleAction}
-            variant={status === "in_progress" ? "primary" : "primary"}
+            variant="primary"
             size="lg"
             fullWidth
           />

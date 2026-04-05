@@ -1,4 +1,4 @@
-import { Circle } from "react-native-maps";
+import Mapbox from "@rnmapbox/maps";
 
 interface SurgeZoneProps {
   center: { lat: number; lng: number };
@@ -13,6 +13,35 @@ const SURGE_COLORS: Record<number, { fill: string; stroke: string }> = {
   3: { fill: "rgba(183, 28, 28, 0.25)", stroke: "rgba(183, 28, 28, 0.7)" },
 };
 
+function createCircleGeoJSON(
+  center: [number, number],
+  radiusKm: number
+): GeoJSON.FeatureCollection {
+  // Approximate circle with a polygon (64 sides)
+  const points = 64;
+  const coords: [number, number][] = [];
+  for (let i = 0; i <= points; i++) {
+    const angle = (i / points) * 2 * Math.PI;
+    const dx = radiusKm / 111.32 * Math.cos(angle);
+    const dy = radiusKm / (111.32 * Math.cos(center[1] * Math.PI / 180)) * Math.sin(angle);
+    coords.push([center[0] + dy, center[1] + dx]);
+  }
+
+  return {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [coords],
+        },
+      },
+    ],
+  };
+}
+
 export default function SurgeZone({
   center,
   radiusMeters,
@@ -25,14 +54,26 @@ export default function SurgeZone({
     );
 
   const colors = SURGE_COLORS[nearestMultiplier] || SURGE_COLORS[2];
+  const radiusKm = radiusMeters / 1000;
+  const circleGeoJSON = createCircleGeoJSON([center.lng, center.lat], radiusKm);
+  const sourceId = `surge-${center.lat}-${center.lng}`;
 
   return (
-    <Circle
-      center={{ latitude: center.lat, longitude: center.lng }}
-      radius={radiusMeters}
-      fillColor={colors.fill}
-      strokeColor={colors.stroke}
-      strokeWidth={2}
-    />
+    <Mapbox.ShapeSource id={sourceId} shape={circleGeoJSON}>
+      <Mapbox.FillLayer
+        id={`${sourceId}-fill`}
+        style={{
+          fillColor: colors.fill,
+          fillOpacity: 1,
+        }}
+      />
+      <Mapbox.LineLayer
+        id={`${sourceId}-stroke`}
+        style={{
+          lineColor: colors.stroke,
+          lineWidth: 2,
+        }}
+      />
+    </Mapbox.ShapeSource>
   );
 }

@@ -3,7 +3,7 @@ import { View, Text, Switch } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import Mapbox from "../../src/services/mapbox";
 import * as Location from "expo-location";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useLocationStore } from "../../src/stores/locationStore";
@@ -11,7 +11,8 @@ import {
   updateDriverLocation,
   removeDriverLocation,
 } from "../../src/services/realtime";
-import { DEFAULT_MAP_DELTA } from "../../src/utils/constants";
+import { getDriverProfile } from "../../src/services/users";
+import { VehicleType } from "../../src/types/user";
 import Card from "../../src/components/ui/Card";
 import LoadingSpinner from "../../src/components/ui/LoadingSpinner";
 
@@ -26,6 +27,7 @@ export default function DriverHomeScreen() {
     isLocationLoading,
   } = useLocationStore();
   const [isOnline, setIsOnline] = useState(false);
+  const [vehicleType, setVehicleType] = useState<VehicleType>("ac_car");
   const [todayStats, setTodayStats] = useState({
     rides: 0,
     earnings: 0,
@@ -33,7 +35,7 @@ export default function DriverHomeScreen() {
   });
   const watchRef = useRef<Location.LocationSubscription | null>(null);
 
-  // Get initial location
+  // Get initial location and driver profile
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -51,6 +53,16 @@ export default function DriverHomeScreen() {
         lng: location.coords.longitude,
       });
       setLocationLoading(false);
+
+      // Fetch driver profile to get vehicle type
+      if (user) {
+        try {
+          const profile = await getDriverProfile(user.id);
+          if (profile?.vehicleType) {
+            setVehicleType(profile.vehicleType);
+          }
+        } catch {}
+      }
     })();
   }, []);
 
@@ -84,7 +96,7 @@ export default function DriverHomeScreen() {
           updateDriverLocation(
             user.id,
             geoPoint,
-            "ac_car", // TODO: get from driver profile
+            vehicleType,
             true
           ).catch(() => {});
         }
@@ -94,8 +106,12 @@ export default function DriverHomeScreen() {
     return () => {
       mounted = false;
       watchRef.current?.remove();
+      // Clean up driver location when effect re-runs or unmounts
+      if (user) {
+        removeDriverLocation(user.id).catch(() => {});
+      }
     };
-  }, [isOnline, user]);
+  }, [isOnline, user, currentLocation, vehicleType]);
 
   // Clean up when going offline
   const handleToggleOnline = (value: boolean) => {
@@ -108,26 +124,27 @@ export default function DriverHomeScreen() {
   };
 
   if (isLocationLoading) {
-    return <LoadingSpinner fullScreen message="Getting your location..." />;
+    return <LoadingSpinner fullScreen message={t("rider.gettingLocation")} />;
   }
 
   return (
     <View className="flex-1">
-      <MapView
+      <Mapbox.MapView
         style={{ flex: 1 }}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation
-        showsMyLocationButton
-        initialRegion={
-          currentLocation
-            ? {
-                latitude: currentLocation.lat,
-                longitude: currentLocation.lng,
-                ...DEFAULT_MAP_DELTA,
-              }
-            : undefined
-        }
-      />
+        styleURL={Mapbox.StyleURL.Street}
+        logoEnabled={false}
+        attributionEnabled={false}
+      >
+        <Mapbox.Camera
+          zoomLevel={14}
+          centerCoordinate={
+            currentLocation
+              ? [currentLocation.lng, currentLocation.lat]
+              : [74.35, 31.52]
+          }
+        />
+        <Mapbox.UserLocation visible animated />
+      </Mapbox.MapView>
 
       {/* Online/Offline Toggle */}
       <SafeAreaView className="absolute top-0 left-0 right-0" edges={["top"]}>
@@ -136,12 +153,12 @@ export default function DriverHomeScreen() {
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="text-lg font-bold text-gray-900">
-                  {isOnline ? "You're Online" : "You're Offline"}
+                  {isOnline ? t("driver.youreOnline") : t("driver.youreOffline")}
                 </Text>
                 <Text className="text-sm text-gray-500">
                   {isOnline
-                    ? "Waiting for ride requests..."
-                    : t("driver.goOnline") + " to start earning"}
+                    ? t("driver.waitingForRequests")
+                    : t("driver.goOnlineToEarn")}
                 </Text>
               </View>
               <Switch
@@ -155,7 +172,7 @@ export default function DriverHomeScreen() {
             {isOnline ? (
               <View className="mt-3 bg-green-50 rounded-lg px-3 py-2">
                 <Text className="text-green-700 text-xs font-medium text-center">
-                  📡 Location broadcasting active
+                  📡 {t("driver.locationBroadcasting")}
                 </Text>
               </View>
             ) : null}
@@ -174,21 +191,21 @@ export default function DriverHomeScreen() {
               <Text className="text-xl font-bold text-gray-900">
                 {todayStats.rides}
               </Text>
-              <Text className="text-xs text-gray-500">Rides</Text>
+              <Text className="text-xs text-gray-500">{t("driver.rides")}</Text>
             </View>
             <View className="w-px bg-gray-200" />
             <View className="items-center">
               <Text className="text-xl font-bold text-gray-900">
-                PKR {todayStats.earnings}
+                {t("common.pkr")} {todayStats.earnings}
               </Text>
-              <Text className="text-xs text-gray-500">Earned</Text>
+              <Text className="text-xs text-gray-500">{t("driver.earned")}</Text>
             </View>
             <View className="w-px bg-gray-200" />
             <View className="items-center">
               <Text className="text-xl font-bold text-gray-900">
                 ⭐ {todayStats.rating || "—"}
               </Text>
-              <Text className="text-xs text-gray-500">Rating</Text>
+              <Text className="text-xs text-gray-500">{t("driver.rating")}</Text>
             </View>
           </View>
         </Card>

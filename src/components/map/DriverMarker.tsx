@@ -1,6 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Animated, View, Text } from "react-native";
-import { Marker } from "react-native-maps";
+import { View, Text } from "react-native";
+import Mapbox from "@rnmapbox/maps";
 import { GeoPoint } from "../../types/user";
 
 interface DriverMarkerProps {
@@ -15,20 +14,15 @@ export default function DriverMarker({
   vehicleIcon = "🚗",
 }: DriverMarkerProps) {
   return (
-    <Marker
-      coordinate={{
-        latitude: location.lat,
-        longitude: location.lng,
-      }}
-      anchor={{ x: 0.5, y: 0.5 }}
-      flat
-      rotation={heading}
+    <Mapbox.PointAnnotation
+      id={`driver-${location.lat}-${location.lng}`}
+      coordinate={[location.lng, location.lat]}
     >
-      <View className="items-center">
+      <View style={{ alignItems: "center", transform: [{ rotate: `${heading}deg` }] }}>
         <View className="bg-white rounded-full p-1.5 shadow-md border border-gray-200">
           <Text className="text-2xl">{vehicleIcon}</Text>
         </View>
       </View>
-    </Marker>
+    </Mapbox.PointAnnotation>
   );
 }

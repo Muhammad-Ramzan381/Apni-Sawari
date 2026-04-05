@@ -3,12 +3,11 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import Mapbox from "../../src/services/mapbox";
 import { useLocation } from "../../src/hooks/useLocation";
 import { useLocationStore } from "../../src/stores/locationStore";
 import { getNearbyDrivers } from "../../src/services/realtime";
 import { getActiveSurgeZones, SurgeZone } from "../../src/services/surge";
-import { DEFAULT_MAP_DELTA } from "../../src/utils/constants";
 import { GeoPoint, VehicleType } from "../../src/types/user";
 import DriverMarker from "../../src/components/map/DriverMarker";
 import SurgeZoneCircle from "../../src/components/map/SurgeZone";
@@ -40,31 +39,33 @@ export default function RiderHomeScreen() {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 15000); // refresh every 15s
+    const interval = setInterval(fetchData, 15000);
     return () => clearInterval(interval);
   }, [currentLocation]);
 
   if (isLocationLoading) {
-    return <LoadingSpinner fullScreen message="Getting your location..." />;
+    return <LoadingSpinner fullScreen message={t("rider.gettingLocation")} />;
   }
 
   return (
     <View className="flex-1">
-      <MapView
+      <Mapbox.MapView
         style={{ flex: 1 }}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation
-        showsMyLocationButton
-        initialRegion={
-          currentLocation
-            ? {
-                latitude: currentLocation.lat,
-                longitude: currentLocation.lng,
-                ...DEFAULT_MAP_DELTA,
-              }
-            : undefined
-        }
+        styleURL={Mapbox.StyleURL.Street}
+        logoEnabled={false}
+        attributionEnabled={false}
       >
+        <Mapbox.Camera
+          zoomLevel={14}
+          centerCoordinate={
+            currentLocation
+              ? [currentLocation.lng, currentLocation.lat]
+              : [74.35, 31.52]
+          }
+        />
+
+        <Mapbox.UserLocation visible animated />
+
         {/* Nearby driver markers */}
         {nearbyDrivers.map((driver) => (
           <DriverMarker
@@ -90,7 +91,7 @@ export default function RiderHomeScreen() {
             multiplier={zone.multiplier}
           />
         ))}
-      </MapView>
+      </Mapbox.MapView>
 
       {/* Top bar: Language toggle */}
       <SafeAreaView className="absolute top-0 right-0" edges={["top"]}>
@@ -142,7 +143,7 @@ export default function RiderHomeScreen() {
 
           {nearbyDrivers.length > 0 ? (
             <Text className="text-center text-xs text-gray-400 mt-2">
-              {nearbyDrivers.length} drivers nearby
+              {t("rider.driversNearby", { count: nearbyDrivers.length })}
             </Text>
           ) : null}
         </Card>

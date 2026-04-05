@@ -20,7 +20,7 @@ const variantStyles = {
   primary: "bg-primary-600 active:bg-primary-700",
   secondary: "bg-secondary-500 active:bg-secondary-600",
   outline: "bg-transparent border-2 border-primary-600",
-  danger: "bg-danger active:bg-red-600",
+  danger: "bg-red-500 active:bg-red-600",
 };
 
 const textVariantStyles = {
