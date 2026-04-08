@@ -2,10 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import Mapbox from "../../src/services/mapbox";
+import Mapbox, { getDirections } from "../../src/services/mapbox";
 import { useLocationStore } from "../../src/stores/locationStore";
 import { useRideStore } from "../../src/stores/rideStore";
-import { getDirections, decodePolyline } from "../../src/services/maps";
 import DriverMarker from "../../src/components/map/DriverMarker";
 import RoutePolyline from "../../src/components/map/RoutePolyline";
 import RideStatusBar from "../../src/components/ride/RideStatusBar";
@@ -34,8 +33,7 @@ export default function TrackingScreen() {
           { lat: pickup.lat, lng: pickup.lng },
           { lat: dropoff.lat, lng: dropoff.lng }
         );
-        const coords = decodePolyline(result.polyline);
-        setRouteCoords(coords);
+        setRouteCoords(result.coordinates);
       } catch {
         // No API key, create simple straight line
         setRouteCoords([

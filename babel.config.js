@@ -4,6 +4,10 @@ module.exports = function (api) {
     presets: [
       ["babel-preset-expo", { jsxImportSource: "nativewind" }],
     ],
-    plugins: [],
+    plugins: [
+      // Reanimated 4 ships its worklets transform via react-native-worklets.
+      // Must be the LAST plugin in the list.
+      "react-native-worklets/plugin",
+    ],
   };
 };

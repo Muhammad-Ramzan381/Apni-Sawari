@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import Mapbox from "../../src/services/mapbox";
+import Mapbox, { getDirections } from "../../src/services/mapbox";
 import { useLocationStore } from "../../src/stores/locationStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { updateDriverLocation } from "../../src/services/realtime";
-import { getDirections, decodePolyline } from "../../src/services/maps";
 import RoutePolyline from "../../src/components/map/RoutePolyline";
 import Card from "../../src/components/ui/Card";
 import Button from "../../src/components/ui/Button";
@@ -40,7 +39,7 @@ export default function DriverNavigationScreen() {
           { lat: currentLocation.lat, lng: currentLocation.lng },
           target
         );
-        setRouteCoords(decodePolyline(result.polyline));
+        setRouteCoords(result.coordinates);
       } catch {
         setRouteCoords([
           {

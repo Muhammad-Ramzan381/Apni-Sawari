@@ -7,8 +7,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
-
-const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+import { MAPBOX_TOKEN } from "../../services/mapbox";
 
 export interface PlaceResult {
   placeId: string;
@@ -38,7 +37,7 @@ export default function LocationInput({
   const [suggestions, setSuggestions] = useState<PlaceResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const searchPlaces = useCallback(async (text: string) => {
     if (text.length < 3) {
@@ -50,29 +49,26 @@ export default function LocationInput({
     setLoading(true);
 
     try {
-      if (GOOGLE_MAPS_API_KEY) {
-        // Real Google Places Autocomplete
-        const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(text)}&components=country:pk&key=${GOOGLE_MAPS_API_KEY}`;
+      if (MAPBOX_TOKEN) {
+        // Mapbox Geocoding (forward search). Returns coordinates inline,
+        // so no second "details" request needed (unlike Google Places).
+        const url =
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(text)}.json` +
+          `?country=pk&autocomplete=true&limit=5&access_token=${MAPBOX_TOKEN}`;
         const response = await fetch(url);
         const data = await response.json();
 
-        if (data.predictions) {
-          const places: PlaceResult[] = await Promise.all(
-            data.predictions.slice(0, 5).map(async (prediction: any) => {
-              // Get place details for coordinates
-              const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`;
-              const detailsRes = await fetch(detailsUrl);
-              const details = await detailsRes.json();
-
-              return {
-                placeId: prediction.place_id,
-                name: prediction.structured_formatting?.main_text || prediction.description,
-                address: prediction.description,
-                lat: details.result?.geometry?.location?.lat || 0,
-                lng: details.result?.geometry?.location?.lng || 0,
-              };
-            })
-          );
+        if (Array.isArray(data.features)) {
+          const places: PlaceResult[] = data.features.map((feature: any) => {
+            const [lng, lat] = feature.center ?? [0, 0];
+            return {
+              placeId: String(feature.id),
+              name: feature.text || feature.place_name,
+              address: feature.place_name,
+              lat,
+              lng,
+            };
+          });
           setSuggestions(places);
         }
       } else {
